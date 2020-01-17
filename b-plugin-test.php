@@ -33,13 +33,44 @@ if( !class_exists('BPluginTest')){
         //     echo 'test static';
         // }
         
+        public $plugin;
+
+        function __construct(){
+            $this->plugin = plugin_basename( __FILE__ );
+        }
+        
         function register_frontend()
         {
             // add css js to frontend
             add_action( 'wp_enqueue_scripts', array( $this, 'enqueue' ) );
             // add css to backend
             //add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
+            add_action( 'admin_menu', array( $this, 'add_admin_pages' ) );
+            
+            
+            add_filter( 'plugin_action_links_' . $this->plugin , array($this, 'settings_link') );
+            //echo $this->plugin;
         }
+        
+        public function add_admin_pages()
+        {           
+            add_menu_page( 'BPluginTest Plugin', 'BPluginTest', 'manage_options', 'bplugintest_plugin', array( $this, 'admin_index'), 'dashicons-money', 110 );
+        }
+
+        public function settings_link($links)
+        {
+            //add  custom setting link
+            $settings_link = '<a href="admin.php?page=bplugintest_plugin">Settings</a>';
+            array_push( $links, $settings_link);
+            return $links;
+        }
+        public function admin_index()
+        {
+            //require template
+            require_once plugin_dir_path( __FILE__ ) . 'templates/admin.php';
+            //require_once plugin_dir_path( __FILE__ ) . 'inc/bPluginTest-activate.php';
+        }
+
         function register_backend()
         {
             // add css js to backend
